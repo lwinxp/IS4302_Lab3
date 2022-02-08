@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./ERC20.sol";
 
 /*
-deploy ERC20 contract
+E.g. 
 deploy DiceToken contract
 input 10 Finney into value
 exceute getCredit
@@ -81,6 +81,11 @@ contract DiceToken {
     function transferFrom(address _from, address _to, uint256 _value) public {
         erc20Contract.transferFrom(_from, _to, _value);
     }
+
+    function diceTokenTransferFrom(address _from, address _spender, address _to, uint256 _value) public {
+        erc20Contract.diceTokenTransferFrom(_from, _spender, _to, _value);
+    }
+    
 
     function transfer(address _to, uint256 _value) public {
         erc20Contract.transfer(_to, _value);
