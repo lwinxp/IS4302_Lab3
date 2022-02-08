@@ -12,16 +12,17 @@ import "./DiceToken.sol";
 /*
 DiceTokenMarket execution / test:
 1. use account A to deploy Dice contract
-2. use account A to deploy ERC20 contract
-3. use account A to deploy DiceToken contract
-4. use account A to deploy DiceTokenMarket contract with arg (Dice contract address, DiceToken contract address, 200)
-5. use account A to execute Dice function add dice with arg (1,2) and value 5 ether, becomes dice 0
-6. use account A to execute Dice function transfer dice with arg (0, DiceTokenMarket address)
-7. use account A to execute DiceTokenMarket function list dice with arg (0, 300)
-8. use account B to execute DiceTokenMarket function buy with arg (0), (with value 1 ether? or 5 ether?)
-(8a. assume account B no need any DT? if error may need to DiceToken getCredit() with value 1 ether? or 5 ether?)
+2. use account A to deploy DiceToken contract
+3. use account A to deploy DiceTokenMarket contract with arg (Dice contract address, DiceToken contract address, 2)
+4. use account A to execute Dice function add dice with arg (1,2) and value 1 ETH, becomes dice 0
+5. use account A to execute Dice function transfer dice with arg (0, DiceTokenMarket address)
+6. use account A to execute DiceTokenMarket function list dice with arg (0, 3)
+7. use account B to execute DiceToken function getCredit with value 1 ETH
+8. use account B to execute DiceTokenMarket function buy with arg (0)
 9. use any account to check Dice variable dices with arg (0). Prev owner of dice should be DiceTokenMarket contract address and owner of dice should be account B address
-(9a. account A balance should have increase by (1 ether? or 5 ether?) and account B balance should have reduce by (1 ether? or 5 ether?))
+10. use account A to check balance should have increase by 3 DT
+11. use account B to execute DiceToken checkCredit function to see 95 DT
+(2 DT was commission fee for DiceMarketToken)
 */
 
 // 1. commissionFee needs to be paid in DT
