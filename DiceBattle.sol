@@ -15,16 +15,17 @@ import "./Dice.sol";
 DiceBattle execution / test:
 1. use account A to deploy Dice contract
 2. use account A to deploy DiceBattle contract with arg (Dice contract address)
-3. use account B to execute function add dice with arg (1,2) and value 1 ether, becomes dice 0
-4. use account B to execute function transfer dice with arg (0, DiceBattle address)
-5. use account B to execute function setBattlePair with arg (account C address, 0)
-6. use account C to execute function add dice with arg (3,4) and value 3 ether, becomes dice 1
-7. use account C to execute function transfer dice with arg (1, DiceBattle address)
-8. use account C to execute function setBattlePair with arg (account B address, 1)
-9. use account C to execute function battle with arg (1, 0, account C address, account B address)
-10. in console check the diceId, newNumber and result event type (winResult, loseResult, tieResult)
-11. use any account to check Dice contract variable dices with arg (0), and with arg (1). The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should reflect the result event type.
-* Result event is relative to the account that executed battle function, as account C executed the battle, hence
+3. use account B to execute Dice function add dice with arg (1,2) and value 1 ether, becomes dice 0
+4. use account B to execute Dice function transfer dice with arg (0, DiceBattle address)
+5. use account B to execute DiceBattle function setBattlePair with arg (account C address, 0)
+6. use account C to execute Dice function add dice with arg (3,4) and value 3 ether, becomes dice 1
+7. use account C to execute Dice function transfer dice with arg (1, DiceBattle address)
+8. use account C to execute DiceBattle function setBattlePair with arg (account B address, 1)
+9. use account C to execute DiceBattle function battle with arg (1, 0, account C address, account B address)
+10. user any account to execute DiceBattle function battleResults with arg (0) to see battle results, including dice1, dice2, player1, player2, winner, and if tie result
+11. use any account to check Dice variable dices with arg (0), and with arg (1). The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should be the winner in step 10 or original owner if tie.
+* in console can also see the diceId, newNumber and result event type (winResult, loseResult, tieResult)
+* result event is relative to the account that executed battle function, as account C executed the battle, hence
 * winResult - account C is owner of dice 0 and dice 1
 * loseResult - account B is owner of dice 0 and dice 1
 * tieResult - account B is owner of dice 0 and account C is owner of dice 1
@@ -32,14 +33,50 @@ DiceBattle execution / test:
 
 contract DiceBattle {
     Dice diceContract;
-    mapping(address => address) public battle_pair;
+    mapping(address => address) battle_pair;
 
     // event selectedBattlePair();
     event tieResult();
     event winResult();
     event loseResult();
 
-    // enum result { win, lose, tie };
+    // mapping (address => mapping (address => uint256)) public result;
+
+    uint256 numBattleResults = 0;
+    mapping(uint256 => battleResult) public battleResults;
+
+    struct battleResult {
+        uint256 diceId1;
+        uint256 diceId2;
+        address player1;
+        address player2;
+        address winner;
+        bool tie;
+    }
+
+    function addBattleResult(
+        uint256 diceId1,
+        uint256 diceId2,
+        address player1,
+        address player2,
+        address winner,
+        bool tie
+    )internal returns(uint256) {
+        
+        //new battleResult object
+        battleResult memory newBattleResult = battleResult(
+            diceId1,
+            diceId2,
+            player1,
+            player2,
+            winner,
+            tie
+        );
+        
+        uint256 newBattleResultId = numBattleResults++;
+        battleResults[newBattleResultId] = newBattleResult; //commit to state variable
+        return newBattleResultId;   //return new battleResultId
+    }
 
     constructor(Dice diceAddress) public {
         diceContract = diceAddress;
@@ -81,14 +118,17 @@ contract DiceBattle {
         if (myDiceNumber > enemyDiceNumber) {
             diceContract.transfer(enemyDice, myAddress);
             diceContract.transfer(myDice, myAddress);
+            addBattleResult(myDice, enemyDice, myAddress, enemyAddress, myAddress, false);
             emit winResult();
         } else if (myDiceNumber < enemyDiceNumber) {
             diceContract.transfer(enemyDice, enemyAddress);
             diceContract.transfer(myDice, enemyAddress);
+            addBattleResult(myDice, enemyDice, myAddress, enemyAddress, enemyAddress, false);
             emit loseResult();
         } else { // myDiceNumber == enemyDiceNumber
             diceContract.transfer(enemyDice, enemyAddress);
             diceContract.transfer(myDice, myAddress);
+            addBattleResult(myDice, enemyDice, myAddress, enemyAddress, address(0), true);
             emit tieResult();
         }
     }
@@ -100,4 +140,28 @@ contract DiceBattle {
         return battle_pair[playerAddress];
     }
     // getBattlePair function is actually redundant, as we have made battle_pair variable public as well, just added getBattlePair function for practice purpose
+    
+    function getWinner(uint256 battleResultId) public view returns (address) {
+        return battleResults[battleResultId].winner;
+    }
+
+    function getTie(uint256 battleResultId) public view returns (bool) {
+        return battleResults[battleResultId].tie;
+    }
+
+    function getDiceId1(uint256 battleResultId) public view returns (uint256) {
+        return battleResults[battleResultId].diceId1;
+    }
+
+    function getDiceId2(uint256 battleResultId) public view returns (uint256) {
+        return battleResults[battleResultId].diceId2;
+    }
+
+    function getPlayerId1(uint256 battleResultId) public view returns (address) {
+        return battleResults[battleResultId].player1;
+    }
+
+    function getPlayerId2(uint256 battleResultId) public view returns (address) {
+        return battleResults[battleResultId].player2;
+    }
 }
