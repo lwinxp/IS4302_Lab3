@@ -24,10 +24,10 @@ DiceBattle execution / test:
 9. use account C to execute function battle with arg (1, 0, account C address, account B address)
 10. in console check the diceId, newNumber and result event type (winResult, loseResult, tieResult)
 11. use any account to check Dice contract variable dices with arg (0), and with arg (1). The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should reflect the result event type.
-Result event is relative to the account that executed battle function, as account C executed the battle, hence
-winResult - account C is owner of dice 0 and dice 1
-loseResult - account B is owner of dice 0 and dice 1
-tieResult - account B is owner of dice 0 and account C is owner of dice 1
+* Result event is relative to the account that executed battle function, as account C executed the battle, hence
+* winResult - account C is owner of dice 0 and dice 1
+* loseResult - account B is owner of dice 0 and dice 1
+* tieResult - account B is owner of dice 0 and account C is owner of dice 1
 */
 
 contract DiceBattle {

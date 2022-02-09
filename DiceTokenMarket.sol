@@ -18,7 +18,7 @@ DiceTokenMarket execution / test:
 9. use any account to check Dice variable dices with arg (0). Prev owner of dice should be DiceTokenMarket contract address and owner of dice should be account B address
 10. use account A to execute DiceToken checkCredit function to see that balance has increased by 3 DT
 11. use account B to execute DiceToken checkCredit function to see that balance has reduced by 5 DT to 95 DT
-(2 DT was commission fee for DiceMarketToken)
+* 2 DT was commission fee for DiceMarketToken
 */
 
 
