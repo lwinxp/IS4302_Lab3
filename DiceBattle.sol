@@ -22,7 +22,7 @@ DiceBattle execution / test:
 7. use account C to execute Dice function transfer dice with arg (1, DiceBattle address)
 8. use account C to execute DiceBattle function setBattlePair with arg (account B address, 1)
 9. use account C to execute DiceBattle function battle with arg (1, 0, account C address, account B address)
-10. user any account to execute DiceBattle function battleResults with arg (0) to see battle results, including dice1, dice2, player1, player2, winner, and if tie result
+10. use any account to execute DiceBattle function battleResults with arg (0) to see battle results, including dice1, dice2, player1, player2, winner, and if tie result
 11. use any account to check Dice variable dices with arg (0), and with arg (1). The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should be the winner in step 10 or original owner if tie.
 * in console can also see the diceId, newNumber and result event type (winResult, loseResult, tieResult)
 * result event is relative to the account that executed battle function, as account C executed the battle, hence
