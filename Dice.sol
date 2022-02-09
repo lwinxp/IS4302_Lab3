@@ -49,12 +49,12 @@ contract Dice {
 
     //modifier to ensure a function is callable only by its owner    
     modifier ownerOnly(uint256 diceId) {
-        require(dices[diceId].owner == msg.sender);
+        require(dices[diceId].owner == msg.sender, "only dice owner can perform this action");
         _;
     }
     
     modifier validDiceId(uint256 diceId) {
-        require(diceId < numDices);
+        require(diceId < numDices, "only valid dice id can be used");
         _;
     }
 

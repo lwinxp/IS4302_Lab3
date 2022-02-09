@@ -16,16 +16,17 @@ DiceBattle execution / test:
 1. use account A to deploy Dice contract
 2. use account A to deploy DiceBattle contract with arg (Dice contract address)
 3. use account B to execute function add dice with arg (1,2) and value 1 ether, becomes dice 0
-4. use account C to execute function add dice with arg (3,4) and value 3 ether, becomes dice 1
-5. use account B to execute function transfer dice with arg (0, DiceBattle address)
-6. use account C to execute function transfer dice with arg (1, DiceBattle address)
-7. use account B to execute function setBattlePair with arg (account C address, 0)
+4. use account B to execute function transfer dice with arg (0, DiceBattle address)
+5. use account B to execute function setBattlePair with arg (account C address, 0)
+6. use account C to execute function add dice with arg (3,4) and value 3 ether, becomes dice 1
+7. use account C to execute function transfer dice with arg (1, DiceBattle address)
 8. use account C to execute function setBattlePair with arg (account B address, 1)
-9. use account B to execute function battle with arg (0, 1, account B address, account C address)
+9. use account C to execute function battle with arg (1, 0, account C address, account B address)
 10. in console check the diceId, newNumber and result event type (winResult, loseResult, tieResult)
-11. use any account to check Dice contract variable dices with arg 0, and with arg 1. The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should reflect the result event type
-winResult - account B is owner of dice 0 and dice 1
-loseResult - account C is owner of dice 0 and dice 1
+11. use any account to check Dice contract variable dices with arg (0), and with arg (1). The prev owner of both dice 0 and dice 1 should be the DiceBattle address, and the new owner should reflect the result event type.
+Result event is relative to the account that executed battle function, as account C executed the battle, hence
+winResult - account C is owner of dice 0 and dice 1
+loseResult - account B is owner of dice 0 and dice 1
 tieResult - account B is owner of dice 0 and account C is owner of dice 1
 */
 
@@ -34,10 +35,11 @@ contract DiceBattle {
     mapping(address => address) public battle_pair;
 
     // event selectedBattlePair();
-    event tieResult(uint256 myDiceNumber, uint256 enemyDiceNumber);
-    event winResult(uint256 myDiceNumber, uint256 enemyDiceNumber);
-    event loseResult(uint256 myDiceNumber, uint256 enemyDiceNumber);
+    event tieResult();
+    event winResult();
+    event loseResult();
 
+    // enum result { win, lose, tie };
 
     constructor(Dice diceAddress) public {
         diceContract = diceAddress;
@@ -61,11 +63,11 @@ contract DiceBattle {
         // emit selectedBattlePair();
     }
 
-    // After player 1 and player 2 have both set setBattlePair, which is each other, either of them can call this battle function
+    // After player 1 and player 2 have both set setBattlePair as each other, either of them can call this battle function
     // but they must know both battling dices' diceId, and both battling accounts' addresses to input as arg
     function battle(uint256 myDice, uint256 enemyDice, address myAddress, address enemyAddress) public {
         // Require that battle_pairs align, ie each player has accepted a battle with the other
-        require(battle_pair[myAddress] == enemyAddress && battle_pair[enemyAddress] == myAddress, "both players must setBattlePair as each other");
+        require(battle_pair[myAddress] == enemyAddress && battle_pair[enemyAddress] == myAddress, "both players must setBattlePair as each other before they can battle");
 
         // Run battle
         diceContract.roll(myDice);
@@ -77,17 +79,17 @@ contract DiceBattle {
         uint enemyDiceNumber = diceContract.getDiceNumber(enemyDice);
 
         if (myDiceNumber > enemyDiceNumber) {
-            emit winResult(myDiceNumber, enemyDiceNumber);
             diceContract.transfer(enemyDice, myAddress);
             diceContract.transfer(myDice, myAddress);
+            emit winResult();
         } else if (myDiceNumber < enemyDiceNumber) {
-            emit loseResult(myDiceNumber, enemyDiceNumber);
             diceContract.transfer(enemyDice, enemyAddress);
             diceContract.transfer(myDice, enemyAddress);
+            emit loseResult();
         } else { // myDiceNumber == enemyDiceNumber
-            emit tieResult(myDiceNumber, enemyDiceNumber);
             diceContract.transfer(enemyDice, enemyAddress);
             diceContract.transfer(myDice, myAddress);
+            emit tieResult();
         }
     }
 
