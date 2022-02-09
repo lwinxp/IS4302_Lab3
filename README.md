@@ -31,3 +31,5 @@
 * winResult - account C is owner of dice 0 and dice 1
 * loseResult - account B is owner of dice 0 and dice 1
 * tieResult - account B is owner of dice 0 and account C is owner of dice 1
+
+### All files and steps are available on Github repo - https://github.com/lwinxp/IS4302_Lab3
