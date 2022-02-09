@@ -3,7 +3,7 @@ import "./Dice.sol";
 import "./DiceToken.sol";
 
 // Flow:
-// user -(msg.sender)-> DiceTokenMarket -(msg.sender)-> (DiceToken -(msg.sender)-> ERC20)
+// user -(msg.sender, tx.origin)-> DiceTokenMarket -(msg.sender)-> (DiceToken -(msg.sender)-> ERC20)
 
 /*
 DiceTokenMarket execution / test:
@@ -17,7 +17,7 @@ DiceTokenMarket execution / test:
 8. use account B to execute DiceTokenMarket function buy with arg (0)
 9. use any account to check Dice variable dices with arg (0). Prev owner of dice should be DiceTokenMarket contract address and owner of dice should be account B address
 10. use account A to check balance should have increase by 3 DT
-11. use account B to execute DiceToken checkCredit function to see 95 DT
+11. use account B to execute DiceToken checkCredit function to reduce by 5 DT to 95 DT
 (2 DT was commission fee for DiceMarketToken)
 */
 
@@ -60,45 +60,39 @@ contract DiceTokenMarket {
         return listPrice[id];
     }
 
-    function diceTokenApprove() public {
-        diceTokenContract.diceTokenApprove(msg.sender, address(this), 500);
-    }
+    // function diceTokenApprove() public {
+    //     diceTokenContract.diceTokenApprove(msg.sender, address(this), 500);
+    // }
 
-
-    function approve() public {
-        diceTokenContract.approve(address(this), 500);
-    }
+    // function approve() public {
+    //     diceTokenContract.approve(address(this), 500);
+    // }
 
     // buyer call this function, buyer is msg.sender
     // buy the dice at the requested price
     function buy(uint256 id) public payable {
         require(listPrice[id] != 0, "only listed dice can be bought"); // is listed
+
         // buyer input value needs to be higher than price + fee
         // require(msg.value >= (listPrice[id] + commissionFee), "buyer input value must equal or exceed price + commissionFee"); // offered price meets minimum ask
+        require(diceTokenContract.diceTokenMarketCheckCredit(msg.sender) >= (listPrice[id] + commissionFee), "buyer input value must equal or exceed price + commissionFee"); // offered price meets minimum ask
 
         // normal address is not payable
         // must define payable address
         // the dice owner is the recipient, used as payable address
         address payable recipient = address(uint160(diceContract.getPrevOwner(id)));
-
-        // if buyer sends ETH and DiceTokenMarket converts to DT for transfer to seller
-        // diceTokenContract.diceTokenMarketGetCredit(msg.value - commissionFee);
-        // diceTokenContract.transfer(recipient, diceTokenContract.checkCredit());
-
-        require(diceTokenContract.diceTokenMarketCheckCredit(msg.sender) >= (listPrice[id] + commissionFee), "buyer input value must equal or exceed price + commissionFee"); // offered price meets minimum ask
         
-        diceTokenContract.diceTokenApprove(msg.sender, address(this), listPrice[id] + commissionFee);
+        diceTokenContract.diceTokenApprove(msg.sender, address(this), listPrice[id] + commissionFee); // only price + fee amount is approved for DiceMarketToken use from buyer account
+
+        // diceTokenContract.diceTokenApprove(msg.sender, address(this), listPrice[id]);
         // diceTokenContract.approve(address(this),listPrice[id]);
-
         // diceTokenContract.transferFrom(msg.sender, recipient, listPrice[id]);
-        diceTokenContract.diceTokenTransferFrom(msg.sender, address(this), recipient, listPrice[id]);
-
+        diceTokenContract.diceTokenTransferFrom(msg.sender, address(this), recipient, listPrice[id]); // price amount is transferFrom buyer to seller
 
         // diceTokenContract.diceTokenApprove(msg.sender, address(this), commissionFee);
         // diceTokenContract.approve(address(this), commissionFee);
-
         // diceTokenContract.transferFrom(msg.sender, address(this), commissionFee);
-        diceTokenContract.diceTokenTransferFrom(msg.sender, address(this), address(this), commissionFee);
+        diceTokenContract.diceTokenTransferFrom(msg.sender, address(this), address(this), commissionFee); // fee amount is transferFrom buyer to this / DiceMarketToken contract
 
         // Dice object custom function to transfer dice to buyer
         diceContract.transfer(id, msg.sender);
@@ -112,20 +106,9 @@ contract DiceTokenMarket {
     function withdraw() public {
         // if caller is seller of the dice
         if (msg.sender == _owner)
-            // solidity standard method, caller to receive balalnce amount from this DiceMarket address
+            // original is solidity standard method, caller to receive balalnce amount from this address
             // msg.sender.transfer(address(this).balance);
             
             diceTokenContract.transfer(msg.sender, diceTokenContract.checkCredit()); // assuming checkCredit() checks the DiceTokenMarket balance here ...      
     }
 }
-
-
-
-
-
-
-
-        // this is where ETH value actually enters the contract
-        // this is the where ETH will convert to DT
-        // and send back to the seller
-        // this contract address, address(this) becomes intermediate_recipient 

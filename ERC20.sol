@@ -1,8 +1,9 @@
 pragma solidity ^0.5.0;
 
-//first need to approve the address of spender 
+// first need to approve the address of spender 
 // Check the allowance
-//Finally able to call transferFrom to transfer tokens
+// Finally able to call transferFrom to transfer tokens
+// tx.origin is a security vulnerability, should avoid using
 
 /**
  * @title SafeMath
@@ -123,7 +124,6 @@ contract ERC20 {
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));
     require(_value <= balances[_from], "From doesn't have enough balance");
-    // require(_value <= allowed[_from][tx.origin], "Not allowed to spend this much");
     require(_value <= allowed[_from][tx.origin], "Not allowed to spend this much");
 
 
@@ -138,11 +138,18 @@ contract ERC20 {
     require(_to != address(0));
     require(_value <= balances[_from], "From doesn't have enough balance");
     // require(_value <= allowed[_from][tx.origin], "Not allowed to spend this much");
+    // original transferFrom uses tx.origin which does not work here
+    // here changed to explicitly pass the spender address in arg
+    // TODO verify: tx.origin here is not the spender, it might be the user account, which maps _from to _from which is incorrect
     require(_value <= allowed[_from][_spender], "Not allowed to spend this much");
 
 
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
+    // allowed[_from][tx.origin] = allowed[_from][tx.origin].sub(_value);
+    // original transferFrom uses tx.origin which does not work here 
+    // here changed to explicitly pass the spender address in arg
+    // TODO verify: tx.origin here is not the spender, it might be the user account, which maps _from to _from which is incorrect
     allowed[_from][_spender] = allowed[_from][_spender].sub(_value);
     emit Transfer(_from, _to, _value);
     return true;
@@ -160,7 +167,7 @@ contract ERC20 {
    */
   function approve(address _spender, uint256 _value) public returns (bool) {
     allowed[msg.sender][_spender] = _value;
-    // change msg.sender to tx.origin
+    // if change msg.sender to tx.origin
     // allowed[tx.origin][_spender] = _value;
 
     emit Approval(msg.sender, _spender, _value);

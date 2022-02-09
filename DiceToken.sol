@@ -43,17 +43,18 @@ contract DiceToken {
         supplyLimit = 10000;
     }
 
-    // getCredit allows wei to be converted to DT
+    // buyer user account calls getCredit to allow wei to be converted to DT
     function getCredit() public payable {
-        // caller will send wei amt, some kind of large number in wei, to convert to DT (where 1 DT = 1 * 10^16 wei, is not sent in ETH)
-        uint256 amt = msg.value / 10000000000000000; // Get DTs eligible (in wei) where (1 DT = 0.01 ETH) OR (1 DT = 10 Finney ) 
+        // In Remix, caller will send wei unit even if specify other unit like ether
+        // which could be some kind of large amount in wei, to convert to DT (where 1 DT = 1 * 10^16 wei, is not sent in ETH)
+        // hence need to divide by 1 * 10^16 to convert wei unit to DT unit
+        uint256 amt = msg.value / 10000000000000000;
+
         // totalSupply is the current total number of DT 
         // supplyLimit is the maximum supply of DT
         // current totalSupply + new supply / amt cannot exceed max supplyLimit
         // cannot mint or add more DT anymore if exceed supplyLimit
         require(erc20Contract.totalSupply() + amt < supplyLimit, "DT supply is not enough");
-
-        // erc20Contract.transfer(owner, msg.sender, amt);
 
         // mint method is the amount to add DT to the current totalSupply of DT 
         // this will mint DT with ETH, reduce ETH and add DT into the caller account balance
@@ -61,31 +62,29 @@ contract DiceToken {
     }
 
     // in future may not make this function public
-    function diceTokenMarketGetCredit(uint value) public payable {
-        uint256 amt = value / 10000000000000000; // Get DTs eligible (in wei) where (1 DT = 0.01 ETH) OR (1 DT = 10 Finney ) 
-        require(erc20Contract.totalSupply() + amt < supplyLimit, "DT supply is not enough");
-        erc20Contract.mint(msg.sender, amt);
-    }
-
+    // function diceTokenMarketGetCredit(uint value) public payable {
+    //     uint256 amt = value / 10000000000000000; // Get DTs eligible (in wei) where (1 DT = 0.01 ETH) OR (1 DT = 10 Finney ) 
+    //     require(erc20Contract.totalSupply() + amt < supplyLimit, "DT supply is not enough");
+    //     erc20Contract.mint(msg.sender, amt);
+    // }
 
     // checkCredit to check the balance amount of (DT or ETH)??? the caller / msg.sender has
     function checkCredit() public view returns(uint256) {
         return erc20Contract.balanceOf(msg.sender);
     }
 
-    // in future may not make this function public
+    // in future may not make this function public, in tutorial leave here for debugging reasons
     function diceTokenMarketCheckCredit(address buyerAddress) public view returns(uint256) {
         return erc20Contract.balanceOf(buyerAddress);
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public {
-        erc20Contract.transferFrom(_from, _to, _value);
-    }
+    // function transferFrom(address _from, address _to, uint256 _value) public {
+    //     erc20Contract.transferFrom(_from, _to, _value);
+    // }
 
     function diceTokenTransferFrom(address _from, address _spender, address _to, uint256 _value) public {
         erc20Contract.diceTokenTransferFrom(_from, _spender, _to, _value);
     }
-    
 
     function transfer(address _to, uint256 _value) public {
         erc20Contract.transfer(_to, _value);

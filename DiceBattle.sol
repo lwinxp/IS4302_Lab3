@@ -14,7 +14,7 @@ import "./Dice.sol";
 /*
 DiceBattle execution / test:
 1. use account A to deploy Dice contract
-2. use account A to deploy DiceBattle contract, with Dice contract address as arg
+2. use account A to deploy DiceBattle contract with arg (Dice contract address)
 3. use account B to execute function add dice with arg (1,2) and value 1 ether, becomes dice 0
 4. use account C to execute function add dice with arg (3,4) and value 3 ether, becomes dice 1
 5. use account B to execute function transfer dice with arg (0, DiceBattle address)

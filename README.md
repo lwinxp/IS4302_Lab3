@@ -11,12 +11,12 @@
 8. use account B to execute DiceTokenMarket function buy with arg (0)
 9. use any account to check Dice variable dices with arg (0). Prev owner of dice should be DiceTokenMarket contract address and owner of dice should be account B address
 10. use account A to check balance should have increase by 3 DT
-11. use account B to execute DiceToken checkCredit function to see 95 DT
+11. use account B to execute DiceToken checkCredit function to reduce by 5 DT to 95 DT
 (2 DT was commission fee for DiceMarketToken)
 
 ## DiceBattle steps:
 1. use account A to deploy Dice contract
-2. use account A to deploy DiceBattle contract, with arg (Dice contract address)
+2. use account A to deploy DiceBattle contract with arg (Dice contract address)
 3. use account B to execute function add dice with arg (1,2) and value 1 ether, becomes dice 0
 4. use account C to execute function add dice with arg (3,4) and value 3 ether, becomes dice 1
 5. use account B to execute function transfer dice with arg (0, DiceBattle address)
